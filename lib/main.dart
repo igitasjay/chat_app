@@ -1,5 +1,5 @@
+import 'package:chat_app/views/chat.dart';
 import 'package:chat_app/views/home.dart';
-import 'package:chat_app/views/phone_login.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -15,8 +15,9 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Chat Application',
       routes: {
-        "/": (context) => const PhoneLogin(),
-        "/home": (context) => const HomePage(),
+        // "/": (context) => const PhoneLogin(),
+        "/": (context) => const HomePage(),
+        "/chat": (context) => const Chat(),
       },
     );
   }
