@@ -15,24 +15,33 @@ class _ChatState extends State<Chat> {
       message: "Hey",
       sender: "101",
       receiver: "202",
-      timestamp: DateTime(2000),
-      isSeenByReceiver: false,
+      timestamp: DateTime(2024, 9, 16),
+      isSeenByReceiver: true,
     ),
     MessageModels(
       message: "Hello",
       sender: "202",
       receiver: "101",
-      timestamp: DateTime(2000),
+      timestamp: DateTime(2024, 9, 17),
       isSeenByReceiver: false,
     ),
     MessageModels(
       message: "How are you?",
       sender: "101",
       receiver: "202",
-      timestamp: DateTime(2000),
+      timestamp: DateTime(2024, 9, 18),
       isSeenByReceiver: false,
     ),
+    MessageModels(
+      message: "How are you?",
+      sender: "202",
+      receiver: "101",
+      timestamp: DateTime(2024, 9, 18),
+      isSeenByReceiver: false,
+      isImage: true,
+    ),
   ];
+  TextEditingController messageController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,7 +50,7 @@ class _ChatState extends State<Chat> {
         title: const Row(
           children: [
             CircleAvatar(
-              backgroundImage: NetworkImage('https://i.pravatar.cc/300'),
+              backgroundImage: NetworkImage('https://i.pravatar.cc/400'),
             ),
             SizedBox(width: 10),
             Column(
@@ -62,15 +71,44 @@ class _ChatState extends State<Chat> {
           ],
         ),
       ),
-      body: ListView.builder(
-          itemCount: messages.length,
-          itemBuilder: (context, index) {
-            return ChatMessage(
-              msg: messages[index],
-              currentUser: "101",
-              isImage: false,
-            );
-          }),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+                itemCount: messages.length,
+                itemBuilder: (context, index) {
+                  return ChatMessage(
+                    msg: messages[index],
+                    currentUser: "101",
+                    isImage: true,
+                  );
+                }),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextFormField(
+              controller: messageController,
+              decoration: InputDecoration(
+                hintText: "type your message...",
+                contentPadding: const EdgeInsets.symmetric(horizontal: 0),
+                prefixIcon: IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.add_a_photo),
+                ),
+                suffixIcon: IconButton(
+                  onPressed: () {
+                    messageController.clear();
+                  },
+                  icon: const Icon(Icons.send_rounded),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(50),
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
     );
   }
 }
