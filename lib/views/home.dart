@@ -15,6 +15,11 @@ class _HomePageState extends State<HomePage> {
         elevation: 0,
         scrolledUnderElevation: 0,
         title: const Text("Chat"),
+        titleTextStyle: const TextStyle(
+          fontWeight: FontWeight.w700,
+          color: Colors.black,
+          fontSize: 24,
+        ),
         actions: [
           IconButton(
             onPressed: () {

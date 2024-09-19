@@ -1,3 +1,4 @@
+import 'package:chat_app/controllers/appwrite_controllers.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
 
@@ -14,6 +15,22 @@ class _PhoneLoginState extends State<PhoneLogin> {
   final _phoneNumberController = TextEditingController();
   final _otpController = TextEditingController();
   String countryCode = "+234";
+
+  void handleOtpSubmission(String userID, BuildContext context) {
+    if (_formKey1.currentState!.validate()) {
+      loginWithOtp(otp: _otpController.text, userID: userID).then((value) {
+        if (value && context.mounted) {
+          Navigator.pushNamedAndRemoveUntil(context, "/home", (route) => false);
+        } else {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Invalid OTP")),
+            );
+          }
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,48 +96,63 @@ class _PhoneLoginState extends State<PhoneLogin> {
                       child: FilledButton(
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
-                            showDialog(
-                              context: context,
-                              builder: (_) => AlertDialog.adaptive(
-                                title: const Text("Verification Code"),
-                                content: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                        "Enter the code that was sent to your phone"),
-                                    const SizedBox(height: 12),
-                                    Form(
-                                      key: _formKey1,
-                                      child: TextFormField(
-                                        validator: (value) {
-                                          if (value!.length != 6) {
-                                            return "Invalid OTP";
-                                          } else {
-                                            return null;
-                                          }
-                                        },
-                                        controller: _otpController,
-                                        keyboardType: TextInputType.phone,
-                                        decoration: InputDecoration(
-                                          labelText: "Verification Code",
-                                          border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(6),
+                            createPhoneSession(
+                              phone: countryCode + _phoneNumberController.text,
+                            ).then((value) {
+                              if (value != "login_error" && context.mounted) {
+                                showDialog(
+                                  context: context,
+                                  builder: (_) => AlertDialog.adaptive(
+                                    title: const Text("Verification Code"),
+                                    content: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                            "Enter the code that was sent to your phone"),
+                                        const SizedBox(height: 12),
+                                        Form(
+                                          key: _formKey1,
+                                          child: TextFormField(
+                                            validator: (value) {
+                                              if (value!.length != 6) {
+                                                return "Invalid OTP";
+                                              } else {
+                                                return null;
+                                              }
+                                            },
+                                            controller: _otpController,
+                                            keyboardType: TextInputType.phone,
+                                            decoration: InputDecoration(
+                                              labelText: "Verification Code",
+                                              border: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
+                                              ),
+                                            ),
                                           ),
-                                        ),
+                                        )
+                                      ],
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          handleOtpSubmission(value, context);
+                                        },
+                                        child: const Text("Submit"),
                                       ),
-                                    )
-                                  ],
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      if (_formKey1.currentState!.validate()) {}
-                                    },
-                                    child: const Text("Submit"),
+                                    ],
                                   ),
-                                ],
+                                );
+                              }
+                            });
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                behavior: SnackBarBehavior.floating,
+                                margin: EdgeInsets.all(16),
+                                content: Text("Failed to send otp"),
                               ),
                             );
                           }
