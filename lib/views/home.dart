@@ -16,9 +16,14 @@ class _HomePageState extends State<HomePage> {
         scrolledUnderElevation: 0,
         title: const Text("Chat"),
         actions: [
-          CircleAvatar(
-            backgroundImage:
-                const Image(image: AssetImage("assets/user.png")).image,
+          IconButton(
+            onPressed: () {
+              Navigator.pushNamed(context, "/profile");
+            },
+            icon: CircleAvatar(
+              backgroundImage:
+                  const Image(image: AssetImage("assets/user.png")).image,
+            ),
           ),
         ],
       ),
@@ -69,7 +74,9 @@ class _HomePageState extends State<HomePage> {
             );
           }),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.pushNamed(context, "/search");
+        },
         child: const Icon(Icons.add),
       ),
     );
