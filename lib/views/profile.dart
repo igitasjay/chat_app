@@ -1,3 +1,4 @@
+import 'package:chat_app/controllers/appwrite_controllers.dart';
 import 'package:flutter/material.dart';
 
 class Profile extends StatefulWidget {
@@ -28,14 +29,23 @@ class _ProfileState extends State<Profile> {
             ),
           ),
           const Divider(),
-          const ListTile(
-            leading: Icon(Icons.logout),
-            title: Text("Log out"),
+          ListTile(
+            onTap: () {
+              logout();
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                "/login",
+                (route) => false,
+              );
+            },
+            leading: const Icon(Icons.logout),
+            title: const Text("Log out"),
           ),
           const Divider(),
-          const ListTile(
-            leading: Icon(Icons.info),
-            title: Text("About"),
+          ListTile(
+            onTap: () {},
+            leading: const Icon(Icons.info),
+            title: const Text("About"),
           ),
         ],
       ),

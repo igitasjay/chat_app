@@ -123,3 +123,8 @@ Future<bool> checkSessions() async {
     return false;
   }
 }
+
+// log out user
+Future<void> logout() async {
+  await account.deleteSession(sessionId: "current");
+}
