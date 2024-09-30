@@ -1,5 +1,10 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
+import 'package:chat_app/main.dart';
+import 'package:chat_app/models/user_data.dart';
+import 'package:chat_app/providers/user_data_provider.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 Client client = Client()
     .setEndpoint('https://cloud.appwrite.io/v1')
@@ -9,10 +14,12 @@ Client client = Client()
 
 const String db = "66eb8eab002553fe6ec3";
 const String userCollection = "66eb8ec20027cb6223f8";
+const String storageBucket = "66f4cfd80022d3ea7485";
 
 // initializa database stuff
 Account account = Account(client);
 Databases databases = Databases(client);
+final Storage storage = Storage(client);
 
 // save phone number to database while creating new account
 Future<bool> savePhoneToDB({
@@ -94,7 +101,7 @@ Future<String> createPhoneSession({
   }
 }
 
-// lgo in with otp
+// log in with otp
 Future<bool> loginWithOtp({
   required String otp,
   required String userID,
@@ -127,4 +134,90 @@ Future<bool> checkSessions() async {
 // log out user
 Future<void> logout() async {
   await account.deleteSession(sessionId: "current");
+}
+
+// load data from appwite collection
+Future<UserData?> getUserDetails({required String userID}) async {
+  try {
+    final response = await databases.getDocument(
+      databaseId: db,
+      collectionId: userCollection,
+      documentId: userID,
+    );
+    print(response.data);
+    return UserData.fromMap(response.data);
+  } catch (e) {
+    print("error on getting user data: $e");
+    return null;
+  }
+}
+
+// update user data
+Future<bool> updateUserData(
+  String pic, {
+  required String userID,
+  required String name,
+}) async {
+  try {
+    final data = await databases.updateDocument(
+      databaseId: db,
+      collectionId: userCollection,
+      documentId: userID,
+    );
+    Provider.of<UserDataProvider>(
+      navigatorKey.currentContext!,
+      listen: false,
+    ).setUserName(name);
+    Provider.of<UserDataProvider>(
+      navigatorKey.currentContext!,
+      listen: false,
+    ).setProfilePicture(pic);
+    debugPrint(data.toString());
+    return true;
+  } on AppwriteException catch (e) {
+    debugPrint("error on updating user data: $e");
+    return false;
+  }
+}
+
+// upload and save image to bucket (create new image)
+Future<String?> saveImageToBucket({required InputFile image}) async {
+  try {
+    final response = await storage.createFile(
+        bucketId: storageBucket, fileId: ID.unique(), file: image);
+    debugPrint("saved image to bucket successfully: $response");
+    return response.$id;
+  } on AppwriteException catch (e) {
+    debugPrint("error on saving image to bucket: $e");
+    return null;
+  }
+}
+
+// update an image in storage bucket : first delete, then create new.
+Future<String?> updateImagefromBucket({
+  required String oldImage,
+  required InputFile image,
+}) async {
+  try {
+    // delete curren image
+    deleteImagefromBucket(oldImage: oldImage);
+    // save new image
+    final newImage = saveImageToBucket(image: image);
+    return newImage;
+  } on AppwriteException catch (e) {
+    debugPrint("failed to update: $e");
+    return null;
+  }
+}
+
+// delete image from bucket
+Future<bool> deleteImagefromBucket({required String oldImage}) async {
+  try {
+    // delete curren image
+    await storage.deleteFile(bucketId: storageBucket, fileId: oldImage);
+    return true;
+  } on AppwriteException catch (e) {
+    debugPrint("failed to delete: $e");
+    return false;
+  }
 }

@@ -1,6 +1,8 @@
 import 'package:chat_app/controllers/appwrite_controllers.dart';
+import 'package:chat_app/providers/user_data_provider.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class PhoneLogin extends StatefulWidget {
   const PhoneLogin({super.key});
@@ -20,7 +22,16 @@ class _PhoneLoginState extends State<PhoneLogin> {
     if (_formKey1.currentState!.validate()) {
       loginWithOtp(otp: _otpController.text, userID: userID).then((value) {
         if (value && context.mounted) {
-          Navigator.pushNamedAndRemoveUntil(context, "/home", (route) => false);
+          Provider.of<UserDataProvider>(context, listen: false)
+              .setUserID(userID);
+          Provider.of<UserDataProvider>(context, listen: false)
+              .setPhoneNumber(countryCode + _phoneNumberController.text);
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            "/update",
+            (route) => false,
+            arguments: {"title": "add"},
+          );
         } else {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -65,6 +76,7 @@ class _PhoneLoginState extends State<PhoneLogin> {
                       key: _formKey,
                       child: TextFormField(
                         controller: _phoneNumberController,
+                        maxLength: 10,
                         validator: (value) {
                           if (value!.length != 10) {
                             return "Invalid phone number";
